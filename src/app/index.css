@@ -123,22 +123,22 @@
 
   /* ── Inputs ─────────────────────────── */
   .input_default {
-    @apply bg-input border border-border-default rounded-lg px-3 py-2
+    @apply bg-input border border-border-default rounded-lg  w-full px-3 py-2
             focus:outline-none focus:ring-3 focus:ring-accent-ring focus:border-accent-pressed
   }
 
   .input_error {
-    @apply bg-input border border-danger rounded-lg px-3 py-2
+    @apply bg-input border border-danger rounded-lg  w-full px-3 py-2
             focus:outline-none focus:ring-3 focus:ring-danger-border focus:border-danger
   }
 
   .input_disabled {
-    @apply bg-elevated border border-border-subtle rounded-lg px-3 py-2
+    @apply bg-elevated border border-border-subtle rounded-lg w-full px-3 py-2
           text-text-disabled cursor-not-allowed
   }
 
   .textarea_default {
-    @apply bg-input border border-border-default rounded-lg px-3 py-2 min-h-24 resize-y
+    @apply bg-input border border-border-default rounded-lg w-full px-3 py-2 min-h-24 resize-y
             focus:outline-none focus:ring-3 focus:ring-accent-ring focus:border-accent-pressed
   }
 

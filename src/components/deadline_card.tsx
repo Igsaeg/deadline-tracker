@@ -1,16 +1,16 @@
-type DeadlineCard = {
+type DeadlineCardProps = {
   title: string
   description: string;
   tags: string[],
-  due_date: string;
+  dueDate: string;
 };
 
 export default function DeadlineCard({
   title,
   description,
   tags,
-  due_date,
-}: DeadlineCard) {
+  dueDate,
+}: DeadlineCardProps) {
   return (
     <div
       className="surface_interactive transition_default p-5 flex flex-col justify-between"
@@ -24,7 +24,7 @@ export default function DeadlineCard({
       </div>
 
       <div>
-        <p className="mb-2">{due_date}</p>
+        <p className="mb-2">{dueDate}</p>
         <div className="flex gap-1 flex-nowrap">
           {tags.map((tag) => (
               <p key={tag} className="badge_accent w-fit line-clamp-1">{tag}</p>

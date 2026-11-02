@@ -1,33 +1,33 @@
 
 import { supabase } from "./supabase_client"
 
-export async function signUp(
+export async function signUpUser(
   email: string,
   password: string,
   displayName: string,
 ) {
-  const { data, error } = await supabase.auth.signUp({
+  const { error: authError } = await supabase.auth.signUp({
     email: email.trim(),
     password,
     options: { data: { display_name: displayName.trim() } },
   });
 
-  if (error) throw new Error(error.message);
+  if (authError) throw new Error(authError.message);
 }
 
-export async function logIn(
+export async function signInUser(
   email: string,
   password: string,
 ) {
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error: authError } = await supabase.auth.signInWithPassword({
     email: email.trim(),
     password,
   });
 
-  if (error) throw new Error(error.message);
+  if (authError) throw new Error(authError.message);
 }
 
-export async function logout() {
-  const { error } = await supabase.auth.signOut()
-  if (error) throw new Error(error.message);
+export async function signOutUser() {
+  const { error: authError } = await supabase.auth.signOut()
+  if (authError) throw new Error(authError.message);
 }

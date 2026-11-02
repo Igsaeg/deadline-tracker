@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { parseDate } from "../lib/parse_timestamptz";
+import { parseTimestamp } from "../lib/parse_timestamptz";
 import { fetchDeadlines } from "../lib/supabase/deadlines";
 import DeadlineCard from "../components/deadline_card";
 import Skeleton from "../components/skeleton_loader";
@@ -10,37 +10,47 @@ type Deadline = {
   title: string;
   description: string;
   tags: string[],
-  due_date: string;
-  is_completed: boolean;
+  dueDate: string;
+  isCompleted: boolean;
 }
 
-export default function Page() {
+export default function HomePage() {
   const [deadlines, setDeadlines] = useState<Deadline[]>([]);
   const [isCreateDeadlineModalOpen, setIsCreateDeadlineModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
   useEffect(() => {
-    let ignore = false;
+    let isCancelled = false;
 
     async function loadDeadlines() {
       try {
-        const data = await fetchDeadlines();
-        if (!ignore) setDeadlines(data);
-      } catch (error) {
-        if (!ignore) setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred.");
+        const fetchedDeadlines = await fetchDeadlines();
+        if (!isCancelled) {
+          setDeadlines(fetchedDeadlines.map((deadline) => ({
+            id: deadline.id,
+            title: deadline.title,
+            description: deadline.description,
+            tags: deadline.tags,
+            dueDate: deadline.due_date,
+            isCompleted: deadline.is_completed,
+          })));
+        }
+      } catch (loadError) {
+        if (!isCancelled) setErrorMessage(loadError instanceof Error ? loadError.message : "An unexpected error occurred.");
       } finally {
-        if (!ignore) setIsLoading(false);
+        if (!isCancelled) setIsLoading(false);
       }
     }
 
     void loadDeadlines();
 
-    return () => { ignore = true; };
-  }, []);
+    return () => { isCancelled = true; };
+  }, [refreshCounter]);
 
-  function formatDate(date: string) {
-    const { monthName, day, hour, minute } = parseDate(date);
+  function formatDueDate(timestamp: string) {
+    const { monthName, day, hour, minute } = parseTimestamp(timestamp);
     return `Due ${monthName} ${day} (${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")})`;
   }
 
@@ -77,22 +87,24 @@ export default function Page() {
           ) : deadlines.length === 0 ? (
             <p className="text-text-secondary col-span-full">No deadlines yet.</p>
           ) : (
-            deadlines.map((task) => (
+            deadlines.map((deadline) => (
               <DeadlineCard
-                key={task.id}
-                title={task.title}
-                description={task.description}
-                tags={task.tags}
-                due_date={formatDate(task.due_date)}
+                key={deadline.id}
+                title={deadline.title}
+                description={deadline.description}
+                tags={deadline.tags}
+                dueDate={formatDueDate(deadline.dueDate)}
               />
             ))
           )}
         </div>
       </div>
 
-      {isCreateDeadlineModalOpen && (
-        <CreateDeadlineModal setIsCreateDeadlineModalOpen={setIsCreateDeadlineModalOpen} />
-      )}
+      <CreateDeadlineModal
+        isOpen={isCreateDeadlineModalOpen}
+        onClose={() => setIsCreateDeadlineModalOpen(false)}
+        onDeadlinesChanged={() => setRefreshCounter((previousCount) => previousCount + 1)}
+      />
     </div>
   )
 }

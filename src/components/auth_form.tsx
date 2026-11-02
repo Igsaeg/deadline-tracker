@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { signUp, logIn } from "../lib/supabase/auth";
+import { signUpUser, signInUser } from "../lib/supabase/auth";
 
-type FieldName = "display_name" | "email" | "password";
-type FieldErrors = Partial<Record<FieldName, string>>;
+type AuthFieldName = "displayName" | "email" | "password";
+type AuthFieldErrors = Partial<Record<AuthFieldName, string>>;
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 6;
 
-export default function Forms() {
+export default function AuthForm() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,58 +15,58 @@ export default function Forms() {
   const [isSigningUp, setIsSigningUp] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
   const [errorMessage, setErrorMessage] = useState("");
 
-  function validate(): FieldErrors {
-    const errors: FieldErrors = {};
+  function validateAuthForm(): AuthFieldErrors {
+    const validationErrors: AuthFieldErrors = {};
 
     if (isSigningUp && !displayName.trim()) {
-      errors.display_name = "Display name is required.";
+      validationErrors.displayName = "Display name is required.";
     }
 
     if (!email.trim()) {
-      errors.email = "Email is required.";
-    } else if (!EMAIL_REGEX.test(email.trim())) {
-      errors.email = "Please enter a valid email address.";
+      validationErrors.email = "Email is required.";
+    } else if (!EMAIL_PATTERN.test(email.trim())) {
+      validationErrors.email = "Please enter a valid email address.";
     }
 
     if (!password) {
-      errors.password = "Password is required.";
+      validationErrors.password = "Password is required.";
     } else if (isSigningUp && password.length < MIN_PASSWORD_LENGTH) {
-      errors.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
+      validationErrors.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
     }
 
-    return errors;
+    return validationErrors;
   }
   
-  function clearFieldError(field: FieldName) {
-    setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
+  function clearFieldError(fieldName: AuthFieldName) {
+    setFieldErrors((previousValue) => ({ ...previousValue, [fieldName]: undefined }));
   }
   
   function switchMethod() {
-    setIsSigningUp((prev) => !prev);
+    setIsSigningUp((previousValue) => !previousValue);
     setFieldErrors({});
     setErrorMessage("");
   }
 
-  async function submitForm(e: React.SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function submitForm(event: React.SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
     setErrorMessage("");
 
-    const errors = validate();
-    setFieldErrors(errors);
-    if (Object.keys(errors).length > 0) return;
+    const validationErrors = validateAuthForm();
+    setFieldErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
 
     setIsSubmitting(true);
 
     try {
-      if (isSigningUp) await signUp(
+      if (isSigningUp) await signUpUser(
         email,
         password,
         displayName,
       )
-      else await logIn(
+      else await signInUser(
         email,
         password
       )
@@ -93,7 +93,7 @@ export default function Forms() {
           <div className="flex flex-col gap-1">
             <label htmlFor="display-name" className="input_label">Display Name</label>
             <input
-              className={`${fieldErrors.display_name ? "input_error" : "input_default"} transition_default`}
+              className={`${fieldErrors.displayName ? "input_error" : "input_default"} transition_default`}
               id="display-name"
               name="display-name"
               type="text"
@@ -102,16 +102,16 @@ export default function Forms() {
               maxLength={50}
               required
               autoComplete="nickname"
-              aria-invalid={!!fieldErrors.display_name}
-              aria-describedby={fieldErrors.display_name ? "display-name-error" : undefined}
-              onChange={(e) => {
-                clearFieldError("display_name");
-                setDisplayName(e.target.value);
+              aria-invalid={!!fieldErrors.displayName}
+              aria-describedby={fieldErrors.displayName ? "display-name-error" : undefined}
+              onChange={(event) => {
+                clearFieldError("displayName");
+                setDisplayName(event.target.value);
               }}
             />
-            {fieldErrors.display_name && (
+            {fieldErrors.displayName && (
               <p id="display-name-error" className="input_hint_error">
-                {fieldErrors.display_name}
+                {fieldErrors.displayName}
               </p>
             )}
           </div>
@@ -130,9 +130,9 @@ export default function Forms() {
             autoComplete="email"
             aria-invalid={!!fieldErrors.email}
             aria-describedby={fieldErrors.email ? "email-error" : undefined}
-            onChange={(e) => {
+            onChange={(event) => {
               clearFieldError("email");
-              setEmail(e.target.value);
+              setEmail(event.target.value);
             }}
           />
           {fieldErrors.email && (
@@ -148,7 +148,7 @@ export default function Forms() {
             <button
               className="button_text input_label text-sm"
               type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
+              onClick={() => setShowPassword((previousValue) => !previousValue)}
               aria-controls="password"
               aria-pressed={showPassword}
             >
@@ -167,9 +167,9 @@ export default function Forms() {
             autoComplete={isSigningUp ? "new-password" : "current-password"}
             aria-invalid={!!fieldErrors.password}
             aria-describedby={fieldErrors.password ? "password-error" : undefined}
-            onChange={(e) => {
+            onChange={(event) => {
               clearFieldError("password");
-              setPassword(e.target.value);
+              setPassword(event.target.value);
             }}
           />
           {fieldErrors.password && (

@@ -1,14 +1,14 @@
 import { supabase } from "./supabase_client"
 
-export async function insertDeadline(
+export async function createDeadline(
   title: string,
   description: string,
   tags: string[],
-  due_date: string
+  dueDate: string
 ) {
   const { error } = await supabase
     .from("deadlines")
-    .insert({ title, description, tags, due_date, is_completed: false });
+    .insert({ title, description, tags, due_date: dueDate, is_completed: false });
 
   if (error) throw error;
 }

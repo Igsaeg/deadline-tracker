@@ -2,47 +2,47 @@ import { BrowserRouter } from "react-router-dom";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase/supabase_client";
-import _Routes from "./routes";
+import AppRoutes from "./routes";
 
-const SessionContext = createContext<Session | null>(null);
-export const useSession = () => useContext(SessionContext);
+const AuthSessionContext = createContext<Session | null>(null);
+export const useAuthSession = () => useContext(AuthSessionContext);
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    let active = true;
+    let isMounted = true;
 
-    const initializeSession = async () => {
+    const loadSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
-        if (active) setSession(session);
+        if (isMounted) setSession(session);
       } catch (error) {
         console.error(error);
-        if (active) setSession(null);
+        if (isMounted) setSession(null);
       }
     };
 
-    void initializeSession();
+    void loadSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      if (active) setSession(nextSession);
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((_event, updatedSession) => {
+      if (isMounted) setSession(updatedSession);
     });
 
     return () => {
-      active = false;
-      subscription.unsubscribe();
+      isMounted = false;
+      authSubscription.unsubscribe();
     };
   }, []);
 
   return (
-    <SessionContext.Provider value={session}>
+    <AuthSessionContext.Provider value={session}>
       <BrowserRouter>
         <main>
-          <_Routes />
+          <AppRoutes />
         </main>
       </BrowserRouter>
-    </SessionContext.Provider>
+    </AuthSessionContext.Provider>
   );
 }
