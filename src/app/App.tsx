@@ -1,16 +1,14 @@
-// src/app/App.tsx
 import { BrowserRouter } from "react-router-dom";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase/supabase_client";
 import _Routes from "./routes";
 
-const SessionContext = createContext<Session | null | undefined>(undefined);
-
+const SessionContext = createContext<Session | null>(null);
 export const useSession = () => useContext(SessionContext);
 
 export default function App() {
-  const [session, setSession] = useState<Session | null | undefined>(undefined);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     let active = true;

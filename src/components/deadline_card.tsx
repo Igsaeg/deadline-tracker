@@ -12,12 +12,15 @@ export default function DeadlineCard({
   due_date,
 }: DeadlineCard) {
   return (
-    <div className="surface_interactive transition_default p-5 flex flex-col justify-between">
+    <div
+      className="surface_interactive transition_default p-5 flex flex-col justify-between"
+      onClick={() => console.log(title)}
+    >
       <div className="mb-5">
         <h2 className="text-xl mb-1.5 line-clamp-1">{title}</h2>
         <p className="text-text-secondary line-clamp-1">
           {description ? description : "No description."}
-          </p>
+        </p>
       </div>
 
       <div>

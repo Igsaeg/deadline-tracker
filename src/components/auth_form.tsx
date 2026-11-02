@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from 'react-router-dom';
 import { signUp, logIn } from "../lib/supabase/auth";
 
-type FieldName = "displayName" | "email" | "password";
+type FieldName = "display_name" | "email" | "password";
 type FieldErrors = Partial<Record<FieldName, string>>;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -18,14 +17,12 @@ export default function Forms() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const navigate = useNavigate();
 
   function validate(): FieldErrors {
     const errors: FieldErrors = {};
 
     if (isSigningUp && !displayName.trim()) {
-      errors.displayName = "Display name is required.";
+      errors.display_name = "Display name is required.";
     }
 
     if (!email.trim()) {
@@ -38,31 +35,24 @@ export default function Forms() {
       errors.password = "Password is required.";
     } else if (isSigningUp && password.length < MIN_PASSWORD_LENGTH) {
       errors.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
-    } else if (isSigningUp && password.length > 50) {
-      errors.password = `Password exceeds 50 characters.`;
-    } 
-    
+    }
+
     return errors;
   }
   
   function clearFieldError(field: FieldName) {
     setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
   }
-
-  const inputClass = (field: FieldName) =>
-    `${fieldErrors[field] ? "input_error" : "input_default"} transition_default`;
   
   function switchMethod() {
     setIsSigningUp((prev) => !prev);
     setFieldErrors({});
     setErrorMessage("");
-    setSuccessMessage("");
   }
 
   async function submitForm(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setErrorMessage("");
-    setSuccessMessage("");
 
     const errors = validate();
     setFieldErrors(errors);
@@ -75,16 +65,13 @@ export default function Forms() {
         email,
         password,
         displayName,
-        setSuccessMessage,
-        navigate
       )
       else await logIn(
         email,
-        password,
-        navigate
+        password
       )
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred.");
     } finally {
       setIsSubmitting(false);
     }
@@ -106,24 +93,25 @@ export default function Forms() {
           <div className="flex flex-col gap-1">
             <label htmlFor="display-name" className="input_label">Display Name</label>
             <input
-              className={inputClass("displayName")}
+              className={`${fieldErrors.display_name ? "input_error" : "input_default"} transition_default`}
               id="display-name"
-              name="displayName"
+              name="display-name"
               type="text"
               placeholder="e.g., Alex Morgan"
               value={displayName}
               maxLength={50}
-              autoComplete="username"
-              aria-invalid={!!fieldErrors.displayName}
-              aria-describedby={fieldErrors.displayName ? "displayName-error" : undefined}
+              required
+              autoComplete="nickname"
+              aria-invalid={!!fieldErrors.display_name}
+              aria-describedby={fieldErrors.display_name ? "display-name-error" : undefined}
               onChange={(e) => {
+                clearFieldError("display_name");
                 setDisplayName(e.target.value);
-                clearFieldError("displayName");
               }}
             />
-            {fieldErrors.displayName && (
-              <p id="displayName-error" className="input_hint_error">
-                {fieldErrors.displayName}
+            {fieldErrors.display_name && (
+              <p id="display-name-error" className="input_hint_error">
+                {fieldErrors.display_name}
               </p>
             )}
           </div>
@@ -132,18 +120,19 @@ export default function Forms() {
         <div className="flex flex-col gap-1">
           <label htmlFor="email" className="input_label">Email Address</label>
           <input
-            className={inputClass("email")}
+            className={`${fieldErrors.email ? "input_error" : "input_default"} transition_default`}
             id="email"
             name="email"
             type="email"
             placeholder="you@example.com"
             value={email}
+            required
             autoComplete="email"
             aria-invalid={!!fieldErrors.email}
             aria-describedby={fieldErrors.email ? "email-error" : undefined}
             onChange={(e) => {
-              setEmail(e.target.value);
               clearFieldError("email");
+              setEmail(e.target.value);
             }}
           />
           {fieldErrors.email && (
@@ -168,18 +157,19 @@ export default function Forms() {
           </div>
 
           <input
-            className={inputClass("password")}
+            className={`${fieldErrors.password ? "input_error" : "input_default"} transition_default`}
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
             placeholder={isSigningUp ? "Create a password" : "Enter your password"}
             value={password}
+            required
             autoComplete={isSigningUp ? "new-password" : "current-password"}
             aria-invalid={!!fieldErrors.password}
             aria-describedby={fieldErrors.password ? "password-error" : undefined}
             onChange={(e) => {
-              setPassword(e.target.value);
               clearFieldError("password");
+              setPassword(e.target.value);
             }}
           />
           {fieldErrors.password && (
@@ -189,11 +179,10 @@ export default function Forms() {
           )}
         </div>
 
-        {errorMessage && <p className="text-danger">{errorMessage}</p>}
-        {successMessage && <p className="text-success">{successMessage}</p>}
+        {errorMessage && <p role="alert" className="text-danger">{errorMessage}</p>}
 
         <button
-          className={`transition_default w-full ${isSubmitting ? "button_disabled" : "button_accent"} ${errorMessage || successMessage ? "" : "mt-5"}`}
+          className={`transition_default w-full ${isSubmitting ? "button_disabled" : "button_accent"} ${errorMessage ? "" : "mt-5"}`}
           type="submit"
           disabled={isSubmitting}
         >{isSubmitting ? "Please wait..." : isSigningUp ? "Create account" : "Log in"}
@@ -205,7 +194,6 @@ export default function Forms() {
         <button
           className="button_text"
           type="button"
-          aria-pressed={showPassword}
           onClick={switchMethod}
         >{isSigningUp ? "Log in" : "Sign up"}
         </button>

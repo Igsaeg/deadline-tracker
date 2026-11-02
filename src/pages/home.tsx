@@ -8,8 +8,8 @@ import CreateDeadlineModal from "../components/create_deadline_modal";
 type Deadline = {
   id: string;
   title: string;
-  description?: string;
-  tags?: string[],
+  description: string;
+  tags: string[],
   due_date: string;
   is_completed: boolean;
 }
@@ -28,7 +28,7 @@ export default function Page() {
         const data = await fetchDeadlines();
         if (!ignore) setDeadlines(data);
       } catch (error) {
-        if (!ignore) setErrorMessage(error.message);
+        if (!ignore) setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred.");
       } finally {
         if (!ignore) setIsLoading(false);
       }
