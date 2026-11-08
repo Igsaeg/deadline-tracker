@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { signUpUser, signInUser } from "../lib/supabase/auth";
+import { signUpUser, signInUser } from "../lib/auth";
 
 type AuthFieldName = "displayName" | "email" | "password";
 type AuthFieldErrors = Partial<Record<AuthFieldName, string>>;
@@ -15,6 +15,7 @@ export default function AuthForm() {
   const [isSigningUp, setIsSigningUp] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -70,6 +71,7 @@ export default function AuthForm() {
         email,
         password
       )
+      setErrorMessage("Success! Check you email.");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred.");
     } finally {
@@ -78,7 +80,7 @@ export default function AuthForm() {
   }
 
   return (
-    <div className="surface_default px-10 py-12 w-md">
+    <div className="modal_default px-10 py-12 w-md">
       <div className="text-center mb-8">
         <h3 className="text-2xl mb-1.5">
           {isSigningUp ? "Let's get you started" : "Welcome back"}
@@ -151,8 +153,7 @@ export default function AuthForm() {
               onClick={() => setShowPassword((previousValue) => !previousValue)}
               aria-controls="password"
               aria-pressed={showPassword}
-            >
-              {showPassword ? "Hide password" : "Show password"}
+            >{showPassword ? "Hide password" : "Show password"}
             </button>
           </div>
 

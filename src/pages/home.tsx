@@ -1,25 +1,20 @@
 import { useEffect, useState } from "react";
-import { parseTimestamp } from "../lib/parse_timestamptz";
-import { fetchDeadlines } from "../lib/supabase/deadlines";
+import { fetchDeadlines, type Deadline } from "../lib/deadlines";
 import DeadlineCard from "../components/deadline_card";
 import Skeleton from "../components/skeleton_loader";
 import CreateDeadlineModal from "../components/create_deadline_modal";
-
-type Deadline = {
-  id: string;
-  title: string;
-  description: string;
-  tags: string[],
-  dueDate: string;
-  isCompleted: boolean;
-}
+import DeadlineModal from "../components/deadline_modal";
 
 export default function HomePage() {
   const [deadlines, setDeadlines] = useState<Deadline[]>([]);
+  const [deadlineModalContent, setDeadlineModalContent] = useState<Deadline | null>(null);
+  
+  const [isDeadlineModalOpen, setIsDeadlineModalOpen] = useState(false);
   const [isCreateDeadlineModalOpen, setIsCreateDeadlineModalOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
   const [refreshCounter, setRefreshCounter] = useState(0);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     let isCancelled = false;
@@ -34,6 +29,7 @@ export default function HomePage() {
             description: deadline.description,
             tags: deadline.tags,
             dueDate: deadline.due_date,
+            parsedDueDate: deadline.parsed_due_date,
             isCompleted: deadline.is_completed,
           })));
         }
@@ -49,17 +45,12 @@ export default function HomePage() {
     return () => { isCancelled = true; };
   }, [refreshCounter]);
 
-  function formatDueDate(timestamp: string) {
-    const { monthName, day, hour, minute } = parseTimestamp(timestamp);
-    return `Due ${monthName} ${day} (${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")})`;
-  }
-
   return (
     <div className="flex justify-center mx-6">
       <div className="w-5xl mt-24">
-        <div className="mb-8">
+        <div>
           <div className="mb-8">
-            <h1 className="text-4xl mb-2">Deadlines</h1>
+            <h1 className="text-4xl mb-2">All Deadlines</h1>
             <p className="text-text-secondary text-lg">Hello.</p>
           </div>
 
@@ -73,7 +64,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="divider_default mb-5"></div>
+        <div className="divider_default mt-8 mb-6"></div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
           {isLoading ? (
@@ -90,15 +81,24 @@ export default function HomePage() {
             deadlines.map((deadline) => (
               <DeadlineCard
                 key={deadline.id}
-                title={deadline.title}
-                description={deadline.description}
-                tags={deadline.tags}
-                dueDate={formatDueDate(deadline.dueDate)}
+                content={deadline}
+                onClick={() => {
+                  setDeadlineModalContent(deadline)
+                  setIsDeadlineModalOpen(true);
+                }}
               />
             ))
           )}
         </div>
       </div>
+
+      {deadlineModalContent && (
+        <DeadlineModal
+          content={deadlineModalContent}
+          isOpen={isDeadlineModalOpen}
+          onClose={() => setIsDeadlineModalOpen(false)}
+        />
+      )}
 
       <CreateDeadlineModal
         isOpen={isCreateDeadlineModalOpen}

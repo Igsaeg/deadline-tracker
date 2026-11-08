@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { createDeadline } from "../lib/supabase/deadlines";
+import { createDeadline } from "../lib/deadlines";
 
 type DeadlineFieldName = "title" | "tags" | "dueDate";
 type DeadlineFieldErrors = Partial<Record<DeadlineFieldName, string>>;
@@ -12,6 +12,7 @@ type CreateDeadlineModalProps = {
 
 export default function CreateDeadlineModal({ isOpen, onClose, onDeadlinesChanged }: CreateDeadlineModalProps) {
   const dialogElementRef = useRef<HTMLDialogElement>(null);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -19,6 +20,7 @@ export default function CreateDeadlineModal({ isOpen, onClose, onDeadlinesChange
   const [dueDate, setDueDate] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [fieldErrors, setFieldErrors] = useState<DeadlineFieldErrors>({});
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -45,7 +47,10 @@ export default function CreateDeadlineModal({ isOpen, onClose, onDeadlinesChange
     const validationErrors: DeadlineFieldErrors = {};
 
     if (!title.trim()) validationErrors.title = "Title is required.";
-    if (!dueDate.trim()) validationErrors.dueDate = "Due date is required.";
+    if (!dueDate)
+      validationErrors.dueDate = "Due date is required.";
+    else if (new Date(dueDate).getTime() < Date.now())
+      validationErrors.dueDate = "Due date must not be older than now.";
 
     return validationErrors;
   }
@@ -64,8 +69,8 @@ export default function CreateDeadlineModal({ isOpen, onClose, onDeadlinesChange
     if (inputValue.endsWith(" ") || inputValue.endsWith(",") || shouldCommitPendingTag) {
       setTagInput("");
     
-      if (tags.length >= 4) {
-        setFieldErrors((previousValue) => ({ ...previousValue, tags: "You can only add up to 4 tags." }));
+      if (tags.length >= 3) {
+        setFieldErrors((previousValue) => ({ ...previousValue, tags: "You can only add up to 3 tags." }));
         return;
       }
 
@@ -88,10 +93,15 @@ export default function CreateDeadlineModal({ isOpen, onClose, onDeadlinesChange
         title.trim(),
         description.trim(),
         tags,
-        new Date(dueDate).toISOString()
+        new Date(dueDate).toISOString(),
       );
       closeModal();
       onDeadlinesChanged();
+      setTitle("");
+      setDescription("");
+      setTags([]);
+      setTagInput("");
+      setDueDate("");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred.");
     } finally {
@@ -103,7 +113,7 @@ export default function CreateDeadlineModal({ isOpen, onClose, onDeadlinesChange
     <dialog
       ref={dialogElementRef}
       aria-labelledby="new-deadline-title"
-      className="fixed inset-0 m-0 open:flex h-dvh max-h-none w-full max-w-none items-center justify-center border-0 bg-transparent p-0 text-inherit backdrop:bg-surface/1 backdrop:backdrop-blur"
+      className="modal_backdrop"
       onClick={(event) => {
         if (event.target === event.currentTarget) closeModal();
       }}
@@ -112,7 +122,7 @@ export default function CreateDeadlineModal({ isOpen, onClose, onDeadlinesChange
         closeModal();
       }}
     >
-      <div className="surface_default w-md px-10 py-12">
+      <div className="modal_default w-116">
         <h3 id="new-deadline-title" className="text-2xl text-center mb-6">New deadline</h3>
 
         <form className="flex flex-col gap-3" onSubmit={submitForm} noValidate>
@@ -150,28 +160,28 @@ export default function CreateDeadlineModal({ isOpen, onClose, onDeadlinesChange
               name="description"
               placeholder="Add a short reminder"
               value={description}
-              maxLength={250}
+              maxLength={200}
               onChange={(event) => setDescription(event.target.value)}
             />
           </div>
 
           <div className="flex flex-col gap-1">
             <label htmlFor="tags" className="input_label">Tags</label>
-            <div className={`transition_default flex flex-wrap gap-2
+            <div className={`transition_default scrollbar_hidden flex flex-nowrap gap-2 overflow-x-auto
                             ${fieldErrors.tags ? "input_error focus-within:ring-3 focus-within:ring-danger-border focus-within:border-danger"
                             : "input_default focus-within:ring-3 focus-within:ring-accent-ring focus-within:border-accent-pressed"}`}
             >
               {tags.length > 0 && (
-                <div className="flex flex-wrap gap-1">
+                <div className="flex gap-1">
                   {tags.map((tag) => (
-                    <p key={tag} className="badge_accent w-fit line-clamp-1">
+                    <p key={tag} className="badge_accent">
                       {tag}
                     </p>
                   ))}
                 </div>
               )}
               <input
-                className="min-w-8 flex-1 bg-transparent outline-none"
+                className="bg-transparent outline-none"
                 id="tags"
                 name="tags"
                 type="text"
@@ -220,7 +230,7 @@ export default function CreateDeadlineModal({ isOpen, onClose, onDeadlinesChange
 
           {errorMessage && <p role="alert" className="text-danger">{errorMessage}</p>}
 
-          <div className="mt-2 flex gap-2">
+          <div className="mt-6 flex gap-2">
             <button
               className="button_secondary flex-1"
               type="button"

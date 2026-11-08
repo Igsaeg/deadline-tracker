@@ -1,7 +1,7 @@
 import { BrowserRouter } from "react-router-dom";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { supabase } from "../lib/supabase/supabase_client";
+import { supabase } from "../lib/supabase_client";
 import AppRoutes from "./routes";
 
 const AuthSessionContext = createContext<Session | null>(null);

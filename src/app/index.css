@@ -72,7 +72,7 @@
 
   p, label, button, input, textarea, select {
     font-family: var(--font-body);
-    line-height: 1.4;
+    line-height: 1.5;
   }
 
   button:hover, a:hover {
@@ -95,30 +95,39 @@
     @apply transition-colors duration-150
   }
 
+  .scrollbar_hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   .divider_default {
     @apply border-t border-border-subtle
   }
 
   /* ── Surfaces ───────────────────────── */
   .surface_default {
-    @apply bg-surface border border-border-subtle rounded-xl
+    @apply bg-surface border border-border-subtle rounded-2xl
   }
 
   .surface_interactive {
-    @apply bg-surface border border-border-subtle rounded-xl cursor-pointer
+    @apply bg-surface border border-border-subtle rounded-2xl cursor-pointer
             hover:border-border-default transition-colors duration-150
   }
 
   .surface_elevated {
-    @apply bg-elevated border border-border-subtle rounded-xl
+    @apply bg-elevated border border-border-subtle rounded-2xl
   }
 
   .modal_default {
-    @apply bg-elevated border border-border-default rounded-xl p-6
+    @apply bg-elevated border border-border-default rounded-3xl p-8 drop-shadow-xl shadow-black
   }
 
   .modal_backdrop {
-    @apply bg-canvas/70 backdrop-blur-sm
+    @apply bg-canvas/40 fixed open:flex h-dvh max-h-none w-full max-w-none items-center justify-center
   }
 
   /* ── Inputs ─────────────────────────── */
@@ -161,7 +170,7 @@
 
   /* ── Buttons ────────────────────────── */
   .button_accent {
-    @apply inline-flex items-center justify-center gap-2 w-fit px-6 py-2.5 rounded-lg
+    @apply inline-flex items-center justify-center gap-2 w-fit px-6 py-2.5 rounded-xl
             bg-accent text-canvas text-sm font-semibold border border-accent
             hover:bg-accent-hover hover:border-accent-hover
             active:bg-accent-pressed active:border-accent-pressed
@@ -170,7 +179,7 @@
   }
 
   .button_secondary {
-    @apply inline-flex items-center justify-center gap-2 w-fit px-6 py-2.5 rounded-lg
+    @apply inline-flex items-center justify-center gap-2 w-fit px-6 py-2.5 rounded-xl
             bg-accent-subtle text-accent text-sm font-semibold border border-accent/40
             hover:bg-accent/20 hover:border-accent
             active:bg-accent/30
@@ -179,7 +188,7 @@
   }
 
   .button_ghost {
-    @apply inline-flex items-center justify-center gap-2 w-fit px-6 py-2.5 rounded-lg
+    @apply inline-flex items-center justify-center gap-2 w-fit px-6 py-2.5 rounded-xl
             text-text-secondary text-sm font-medium border border-border-default
             hover:bg-hover hover:text-text-primary hover:border-text-muted
             active:bg-elevated
@@ -188,7 +197,7 @@
   }
 
   .button_danger {
-    @apply inline-flex items-center justify-center gap-2 w-fit px-6 py-2.5 rounded-lg
+    @apply inline-flex items-center justify-center gap-2 w-fit px-6 py-2.5 rounded-xl
             bg-danger-surface text-danger text-sm font-semibold border border-danger-border
             hover:bg-danger/25 hover:border-danger
             transition-colors duration-150
@@ -196,7 +205,7 @@
   }
 
   .button_disabled {
-    @apply inline-flex items-center justify-center gap-2 w-fit px-6 py-2.5 rounded-lg
+    @apply inline-flex items-center justify-center gap-2 w-fit px-6 py-2.5 rounded-xl
             bg-elevated text-text-disabled text-sm font-semibold border border-border-subtle
             cursor-not-allowed
   }
@@ -208,19 +217,19 @@
 
   /* ── Badges ─────────────────────────── */
   .badge_accent {
-    @apply bg-accent-subtle text-accent text-sm px-2.5 py-0.5 rounded-full
+    @apply bg-accent-subtle text-accent text-sm px-2.5 py-0.5 w-fit rounded-full truncate
   }
 
   .badge_success {
-    @apply bg-success-surface text-success text-sm px-2.5 py-0.5 rounded-full
+    @apply bg-success-surface text-success text-sm px-2.5 py-0.5 w-fit rounded-full truncate
   }
 
   .badge_warning {
-    @apply bg-warning-surface text-warning text-sm px-2.5 py-0.5 rounded-full
+    @apply bg-warning-surface text-warning text-sm px-2.5 py-0.5 w-fit rounded-full truncate
   }
 
   .badge_danger {
-    @apply bg-danger-surface text-danger text-sm px-2.5 py-0.5 rounded-full
+    @apply bg-danger-surface text-danger text-sm px-2.5 py-0.5 w-fit rounded-full truncate
   }
 
   /* ── Alerts ─────────────────────────── */
