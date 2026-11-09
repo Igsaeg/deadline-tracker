@@ -67,7 +67,7 @@ export default function HomePage() {
           </button>
         </div>
 
-        <div className="divider_default my-8"></div>
+        <div className="divider_default mt-8 mb-6"></div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
           {isLoading ? (
