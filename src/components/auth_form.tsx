@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { signUpUser, signInUser } from "../lib/supabase/auth";
+import { signUpUser, signInUser } from "../lib/auth";
 
 type AuthFieldName = "displayName" | "email" | "password";
 type AuthFieldErrors = Partial<Record<AuthFieldName, string>>;
@@ -15,6 +15,7 @@ export default function AuthForm() {
   const [isSigningUp, setIsSigningUp] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -70,6 +71,7 @@ export default function AuthForm() {
         email,
         password
       )
+      setErrorMessage("Success! Check you email.");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred.");
     } finally {
@@ -78,20 +80,17 @@ export default function AuthForm() {
   }
 
   return (
-    <div className="surface_default px-10 py-12 w-md">
-      <div className="text-center mb-8">
-        <h3 className="text-2xl mb-1.5">
-          {isSigningUp ? "Let's get you started" : "Welcome back"}
-        </h3>
-        <p className="text-text-secondary">
-          {isSigningUp ? "Takes less than a minute." : "Pick up right where you left off."}
-        </p>
-      </div>
+    <div className="modal_default w-md pt-14 pb-12">
+      <h3 className="text-2xl mb-8 text-center ">
+        {isSigningUp ? "Create an account" : "Welcome back"}
+      </h3>
 
       <form onSubmit={submitForm} noValidate className="flex flex-col gap-3">
         {isSigningUp && (
           <div className="flex flex-col gap-1">
-            <label htmlFor="display-name" className="input_label">Display Name</label>
+            <label className="input_label" htmlFor="display-name">
+              Display Name
+            </label>
             <input
               className={`${fieldErrors.displayName ? "input_error" : "input_default"} transition_default`}
               id="display-name"
@@ -110,7 +109,7 @@ export default function AuthForm() {
               }}
             />
             {fieldErrors.displayName && (
-              <p id="display-name-error" className="input_hint_error">
+              <p className="input_hint_error" id="display-name-error">
                 {fieldErrors.displayName}
               </p>
             )}
@@ -118,9 +117,12 @@ export default function AuthForm() {
         )}
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="email" className="input_label">Email Address</label>
+          <label className="input_label" htmlFor="email">
+            Email Address
+          </label>
           <input
-            className={`${fieldErrors.email ? "input_error" : "input_default"} transition_default`}
+            className={`transition_default
+                      ${fieldErrors.email ? "input_error" : "input_default"}`}
             id="email"
             name="email"
             type="email"
@@ -136,7 +138,7 @@ export default function AuthForm() {
             }}
           />
           {fieldErrors.email && (
-            <p id="email-error" className="input_hint_error">
+            <p className="input_hint_error" id="email-error">
               {fieldErrors.email}
             </p>
           )}
@@ -144,20 +146,22 @@ export default function AuthForm() {
 
         <div className="flex flex-col gap-1">
           <div className="flex justify-between">
-            <label htmlFor="password" className="input_label">Password</label>
+            <label className="input_label" htmlFor="password">
+              Password
+            </label>
             <button
-              className="button_text input_label text-sm"
+              className="button_text input_label text-sm p-0"
               type="button"
               onClick={() => setShowPassword((previousValue) => !previousValue)}
               aria-controls="password"
               aria-pressed={showPassword}
-            >
-              {showPassword ? "Hide password" : "Show password"}
+            >{showPassword ? "Hide password" : "Show password"}
             </button>
           </div>
 
           <input
-            className={`${fieldErrors.password ? "input_error" : "input_default"} transition_default`}
+            className={`transition_default
+                      ${fieldErrors.password ? "input_error" : "input_default"}`}
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
@@ -173,7 +177,7 @@ export default function AuthForm() {
             }}
           />
           {fieldErrors.password && (
-            <p id="password-error" className="input_hint_error">
+            <p className="input_hint_error" id="password-error">
               {fieldErrors.password}
             </p>
           )}
